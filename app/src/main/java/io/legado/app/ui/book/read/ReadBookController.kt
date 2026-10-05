@@ -2534,6 +2534,15 @@ class ReadBookController(
                 return true
             }
 
+            // 遥控器确认键/回车：呼出阅读菜单（对应屏幕中央点按手势；
+            // 菜单打开时函数已在上方提前返回，按键交由菜单内焦点项处理）
+            KeyEvent.KEYCODE_DPAD_CENTER,
+            KeyEvent.KEYCODE_ENTER,
+            KeyEvent.KEYCODE_NUMPAD_ENTER -> {
+                toggleMenu()
+                return true
+            }
+
             KeyEvent.KEYCODE_DPAD_UP, KeyEvent.KEYCODE_DPAD_LEFT -> {
                 handleKeyPage(PageDirection.PREV, longPress)
                 return true

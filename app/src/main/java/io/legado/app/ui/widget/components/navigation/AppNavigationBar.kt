@@ -41,6 +41,7 @@ import top.yukonga.miuix.kmp.basic.NavigationBarDisplayMode
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.basic.NavigationBar as MiuixNavigationBar
 import top.yukonga.miuix.kmp.basic.NavigationBarItem as MiuixNavigationBarItem
+import io.legado.app.ui.widget.components.focus.appFocusRing
 
 @Composable
 fun AppNavigationBar(
@@ -132,10 +133,12 @@ fun RowScope.AppNavigationBarItem(
     val isMiuix = ThemeResolver.isMiuixEngine(LegadoTheme.composeEngine)
     val useCustomIconBox =
         useCustomIcon && LocalAppUiConfiguration.current.appShell.useFloatingBottomBar
+    // 遥控器 D-pad 导航时的焦点高亮（仅 TV 生效）
+    val ringModifier = modifier.appFocusRing(shape = RoundedCornerShape(16.dp))
 
     if (useCustomIconBox) {
         Box(
-            modifier = modifier
+            modifier = ringModifier
                 .weight(1f)
                 .fillMaxHeight()
                 .clickable(
@@ -160,7 +163,7 @@ fun RowScope.AppNavigationBarItem(
         MiuixCustomNavigationBarItem(
             selected = selected,
             onClick = onClick,
-            modifier = modifier,
+            modifier = ringModifier,
             labelString = labelString,
             showLabel = m3ShowLabel && (m3AlwaysShowLabel || selected),
             icon = m3Icon,
@@ -171,13 +174,13 @@ fun RowScope.AppNavigationBarItem(
             onClick = onClick,
             icon = iconVector,
             label = labelString,
-            modifier = modifier
+            modifier = ringModifier
         )
     } else {
         ShortNavigationBarItem(
             selected = selected,
             onClick = onClick,
-            modifier = modifier,
+            modifier = ringModifier,
             icon = m3Icon,
             colors = ShortNavigationBarItemDefaults.colors(selectedIndicatorColor = m3IndicatorColor),
             label = if (m3ShowLabel && (m3AlwaysShowLabel || selected)) {

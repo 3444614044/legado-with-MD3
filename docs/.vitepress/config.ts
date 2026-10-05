@@ -25,6 +25,7 @@ export default defineConfig({
             { text: '导入源管理', link: '/guide/book-source' },
             { text: '订阅源管理', link: '/guide/rss-source' },
             { text: '替换规则', link: '/guide/replace-rule' },
+            { text: 'TV 与遥控器', link: '/guide/tv-remote' },
           ],
         },
         {
@@ -44,6 +45,7 @@ export default defineConfig({
             { text: '导入源管理', link: '/guide/book-source' },
             { text: '订阅源管理', link: '/guide/rss-source' },
             { text: '替换规则', link: '/guide/replace-rule' },
+            { text: 'TV 与遥控器', link: '/guide/tv-remote' },
           ],
         },
         {

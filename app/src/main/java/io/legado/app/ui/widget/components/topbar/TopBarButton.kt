@@ -58,6 +58,8 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.basic.Icon as MiuixIcon
 import top.yukonga.miuix.kmp.basic.IconButton as MiuixIconButton
 import top.yukonga.miuix.kmp.basic.Text as MiuixText
+import io.legado.app.ui.widget.components.focus.appFocusRing
+import androidx.compose.foundation.shape.CircleShape
 
 /** 顶栏按钮样式配置。 */
 enum class TopBarButtonStyle(val storageValue: String) {
@@ -308,12 +310,14 @@ fun TopBarActionButton(
     contentDescription: String?,
     modifier: Modifier = Modifier
 ) {
+    // 遥控器 D-pad 导航时的焦点高亮（仅 TV 生效）
+    val ringModifier = modifier.appFocusRing(shape = CircleShape)
     if (ThemeResolver.isMiuixEngine(LegadoTheme.composeEngine) &&
         currentTopBarButtonStyle() == TopBarButtonStyle.Plain
     ) {
         MiuixIconButton(
             onClick = onClick,
-            modifier = modifier,
+            modifier = ringModifier,
         ) {
             MiuixIcon(
                 imageVector = imageVector,
@@ -325,7 +329,7 @@ fun TopBarActionButton(
             onClick = onClick,
             imageVector = imageVector,
             contentDescription = contentDescription,
-            modifier = modifier
+            modifier = ringModifier
         )
     }
 }

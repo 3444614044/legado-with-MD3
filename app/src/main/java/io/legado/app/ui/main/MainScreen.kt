@@ -121,6 +121,8 @@ import top.yukonga.miuix.kmp.basic.NavigationRailValue
 import top.yukonga.miuix.kmp.basic.rememberNavigationRailState
 import top.yukonga.miuix.kmp.basic.NavigationRail as MiuixNavigationRail
 import top.yukonga.miuix.kmp.basic.NavigationRailItem as MiuixNavigationRailItem
+import io.legado.app.ui.widget.components.focus.appFocusRing
+import androidx.compose.foundation.shape.RoundedCornerShape
 
 private val MainNavigationTabMinWidth = 76.dp
 
@@ -396,9 +398,10 @@ fun MainScreen(
                     val destinationLabel = stringResource(destination.labelId)
 
                     WideNavigationRailItem(
-                        modifier = Modifier.semantics(mergeDescendants = true) {
-                            contentDescription = destinationLabel
-                        },
+                        modifier = Modifier.appFocusRing(shape = RoundedCornerShape(16.dp))
+                            .semantics(mergeDescendants = true) {
+                                contentDescription = destinationLabel
+                            },
                         railExpanded = navState.targetValue == WideNavigationRailValue.Expanded,
                         selected = selected,
                         onClick = {

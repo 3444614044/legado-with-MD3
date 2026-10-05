@@ -74,6 +74,7 @@ import io.legado.app.ui.widget.components.text.AppText
 import io.legado.app.utils.HtmlFormatter
 import io.legado.app.utils.toTimeAgo
 import kotlinx.collections.immutable.ImmutableList
+import io.legado.app.ui.widget.components.focus.appFocusRing
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -98,6 +99,7 @@ fun BookshelfGridItem(
             .clip(RoundedCornerShape(4.dp))
             .then(if (isSelected) Modifier.background(LegadoTheme.colorScheme.secondaryContainer) else Modifier)
             .combinedClickable(role = Role.Button, onClick = onClick, onLongClick = onLongClick)
+            .appFocusRing(shape = RoundedCornerShape(4.dp))
             .bookshelfItemSemantics(accessibilityLabel ?: title, isSelected)
     ) {
         Column(

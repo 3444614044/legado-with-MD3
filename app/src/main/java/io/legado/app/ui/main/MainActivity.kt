@@ -103,6 +103,10 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
+import androidx.compose.ui.platform.LocalContext
+import io.legado.app.constant.EventBus
+import io.legado.app.utils.isTv
+import io.legado.app.utils.eventBus.FlowEventBus
 
 /**
  * 主界面
@@ -429,7 +433,9 @@ open class MainActivity : BaseComposeActivity(), AudioPlay.CallBack {
             mangaSettingsGateway.currentSettings,
         )
 
-        val useRail = when (tabletInterface) {
+        // 电视：大屏默认使用侧边导航栏；用户显式设为 off 时仍尊重其选择
+        val isTvHost = LocalContext.current.isTv
+        val useRail = if (isTvHost && tabletInterface != "off") true else when (tabletInterface) {
             "always" -> true
             "landscape" -> orientation == Configuration.ORIENTATION_LANDSCAPE
             "off" -> false
@@ -942,6 +948,12 @@ open class MainActivity : BaseComposeActivity(), AudioPlay.CallBack {
         if (keyCode == KeyEvent.KEYCODE_MENU && isDown) {
             activeReadBookInputHandler?.toggleMenu()
             if (activeReadBookInputHandler != null) return true
+            // 电视遥控器：主界面按菜单键刷新书架（遥控器没有下拉刷新手势），
+            // 走既有的 UP_ALL_BOOK_TOC 通道，由书架 ViewModel 订阅执行
+            if (isTv) {
+                FlowEventBus.post(EventBus.UP_ALL_BOOK_TOC, Unit)
+                return true
+            }
         }
         return super.dispatchKeyEvent(event)
     }

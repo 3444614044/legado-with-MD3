@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android TV 启动器横幅（320x180，启动器按需缩放）：品牌渐变底 + 居中应用图标 -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="315"
+                android:startColor="#FF3A5FBA"
+                android:endColor="#FF1B2440" />
+        </shape>
+    </item>
+    <item>
+        <inset
+            android:drawable="@mipmap/ic_launcher"
+            android:insetLeft="30%"
+            android:insetRight="30%"
+            android:insetTop="8%"
+            android:insetBottom="8%" />
+    </item>
+</layer-list>
