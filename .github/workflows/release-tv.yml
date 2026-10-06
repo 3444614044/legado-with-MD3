@@ -1,0 +1,110 @@
+name: Release TV Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: "APK 来源的 Auto Build run id"
+        required: false
+        default: "37400379354"
+      tag:
+        description: "Release 标签名（留空则按日期生成 tv-YYYYMMDD）"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Sign & Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Download build APKs
+        uses: actions/download-artifact@v4
+        with:
+          run-id: ${{ inputs.run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          pattern: "*-apk-release"
+          merge-multiple: true
+          path: artifacts
+
+      - name: Download mapping artifact
+        uses: actions/download-artifact@v4
+        with:
+          run-id: ${{ inputs.run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          pattern: "legado.app.release.mapping*"
+          merge-multiple: true
+          path: artifacts
+
+      - name: Sign APKs with throwaway key
+        run: |
+          ls -l artifacts
+          BT_DIR=$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)
+          APKSIGNER="$ANDROID_HOME/build-tools/$BT_DIR/apksigner"
+          keytool -genkeypair -v -keystore /tmp/tv-release.jks \
+            -storepass tv-release -alias tv -keypass tv-release \
+            -keyalg RSA -keysize 2048 -validity 30 \
+            -dname "CN=TV Release,O=CI Fork,C=US"
+          for apk in artifacts/*.apk; do
+            case "$apk" in
+              *unsigned*) ;;
+              *) continue ;;
+            esac
+            base=$(basename "$apk" .apk)
+            out="artifacts/${base%-unsigned}.apk"
+            "$APKSIGNER" sign --ks /tmp/tv-release.jks \
+              --ks-pass pass:tv-release --key-pass pass:tv-release \
+              --out "$out" "$apk"
+            echo "signed: $out"
+          done
+          # 删除未签名原件，避免 Release 附带 unsigned APK
+          rm -f artifacts/*unsigned.apk
+
+          # 展开 mapping 包
+          if ls artifacts/*.zip >/dev/null 2>&1; then
+            cd artifacts && for z in *.zip; do unzip -o "$z" >/dev/null && rm -f "$z"; done && cd ..
+          fi
+          ls -l artifacts
+
+      - name: Resolve tag
+        id: tag
+        run: |
+          TAG="${{ inputs.tag }}"
+          if [ -z "$TAG" ]; then TAG="tv-$(date +%Y%m%d)"; fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          name: ${{ steps.tag.outputs.tag }} TV 遥控器适配版
+          prerelease: false
+          body: |
+            ## 本版本内容
+
+            基于 `main`（含 Android TV 适配提交）的已签名构建：
+
+            - ✅ **TV 启动器入口**（LEANBACK_LAUNCHER）+ 横幅 `tv_banner`
+            - ✅ **触摸屏/Leanback 声明为可选**，TV 可正常安装
+            - ✅ **遥控器 D-pad 焦点高亮**（书卡、导航栏、顶栏按钮）
+            - ✅ **确认键呼出阅读菜单**；**菜单键刷新书架**（isTv）
+            - ✅ 电视默认侧边导航栏（大屏布局）
+
+            构建来源：Auto Build run ${{ inputs.run_id }}
+
+            > ⚠️ **签名说明**：本 APK 使用 CI 临时密钥签名，仅用于试用安装。
+            > 正式发布请在本地用你的上传密钥重新签名。
+
+            完整按键映射与验证清单见 `docs/guide/tv-remote.md`。
+          files: |
+            artifacts/*.apk
+            artifacts/mapping.txt
+          fail_on_unmatched_files: true
